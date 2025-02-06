@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using HarmonyLib;
 using Lod;
 using Lod.ImageRecognition;
@@ -19,10 +21,9 @@ namespace TetoteCoreFixes {
             return true;
         }
 
-        [HarmonyPrefix, HarmonyPatch(typeof(ScreenRotater), "Rotate")]
-        static bool Rotate(ref bool __result, uint DisplayNumber, ScreenRotater.Orientations Orientation) {
+        [HarmonyPrefix, HarmonyPatch(typeof(ScreenObserver), "Update")]
+        static bool Rotate() {
             if (Main.ConfigPreventAutoScreenRotate.Value) {
-                __result = true;
                 return false;
             }
             return true;
@@ -53,6 +54,51 @@ namespace TetoteCoreFixes {
             // TODO: check winapi for touchpanel
             __result = true;
             return false;
+        }
+
+
+        [HarmonyPrefix, HarmonyPatch(typeof(GWSafeFile), "WriteStr")]
+        public static bool WriteStr(string _targetStr, string _baseName, int _MaxLog, bool _bUseCommit = false) {
+            if (!Directory.Exists("nvram")) {
+                Main.Log.LogInfo("Created nvram directory");
+                Directory.CreateDirectory("nvram");
+            }
+            File.WriteAllText("nvram\\"+_baseName, _targetStr);
+            return false;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(GWSafeFile), "ReadStr")]
+        public static bool ReadStr(ref string __result, string _baseName) {
+            if (File.Exists("nvram\\"+_baseName)) {
+                __result = File.ReadAllText("nvram\\" + _baseName);
+            } else {
+                __result = "";
+            }
+
+            return false;
+        }
+
+        private static readonly DateTimeOffset FAR_FUTURE = new DateTimeOffset(2090, 1, 1, 1, 1, 1, TimeSpan.Zero);
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(LoginBonusScheduleInfo), "EndDate", MethodType.Getter)]
+        [HarmonyPatch(typeof(MissionInfo), "EndDate", MethodType.Getter)]
+        [HarmonyPatch(typeof(EventInfo), "EndDate", MethodType.Getter)]
+        [HarmonyPatch(typeof(MissionBase), "DisplayEndDateTime", MethodType.Getter)]
+        [HarmonyPatch(typeof(StageInfo), "EndDate", MethodType.Getter)]
+        [HarmonyPatch(typeof(StageLocationInfo), "EndDate", MethodType.Getter)]
+        [HarmonyPatch(typeof(CollaborationInfo), "EndDate", MethodType.Getter)]
+        [HarmonyPatch(typeof(InformationVideoInfo), "EndDate", MethodType.Getter)]
+        [HarmonyPatch(typeof(MissionListElement), "EndDateTime", MethodType.Getter)]
+        [HarmonyPatch(typeof(ShopItemInfo), "EndDateTime", MethodType.Getter)]
+        [HarmonyPatch(typeof(MissionBase), "ValidityEndDateTime", MethodType.Getter)]
+        public static bool EndDate(ref DateTimeOffset? __result) {
+            if (Main.ConfigEndlessDates.Value) {
+                __result = FAR_FUTURE;
+                return false;
+            }
+
+            return true;
         }
         
     }
