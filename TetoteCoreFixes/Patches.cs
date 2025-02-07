@@ -8,6 +8,7 @@ using ScreenRotate;
 using UnityEngine;
 using Input = Lod.Input;
 using Logger = UnityEngine.Logger;
+using Random = System.Random;
 
 namespace TetoteCoreFixes {
     public class Patches {
@@ -81,14 +82,14 @@ namespace TetoteCoreFixes {
         private static readonly DateTimeOffset FAR_FUTURE = new DateTimeOffset(2090, 1, 1, 1, 1, 1, TimeSpan.Zero);
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(LoginBonusScheduleInfo), "EndDate", MethodType.Getter)]
+        //[HarmonyPatch(typeof(LoginBonusScheduleInfo), "EndDate", MethodType.Getter)]
         [HarmonyPatch(typeof(MissionInfo), "EndDate", MethodType.Getter)]
-        [HarmonyPatch(typeof(EventInfo), "EndDate", MethodType.Getter)]
+        //[HarmonyPatch(typeof(EventInfo), "EndDate", MethodType.Getter)]
         [HarmonyPatch(typeof(MissionBase), "DisplayEndDateTime", MethodType.Getter)]
         [HarmonyPatch(typeof(StageInfo), "EndDate", MethodType.Getter)]
         [HarmonyPatch(typeof(StageLocationInfo), "EndDate", MethodType.Getter)]
-        [HarmonyPatch(typeof(CollaborationInfo), "EndDate", MethodType.Getter)]
-        [HarmonyPatch(typeof(InformationVideoInfo), "EndDate", MethodType.Getter)]
+        //[HarmonyPatch(typeof(CollaborationInfo), "EndDate", MethodType.Getter)]
+        //[HarmonyPatch(typeof(InformationVideoInfo), "EndDate", MethodType.Getter)]
         [HarmonyPatch(typeof(MissionListElement), "EndDateTime", MethodType.Getter)]
         [HarmonyPatch(typeof(ShopItemInfo), "EndDateTime", MethodType.Getter)]
         [HarmonyPatch(typeof(MissionBase), "ValidityEndDateTime", MethodType.Getter)]
@@ -96,6 +97,19 @@ namespace TetoteCoreFixes {
             if (Main.ConfigEndlessDates.Value) {
                 __result = FAR_FUTURE;
                 return false;
+            }
+
+            return true;
+        }
+
+        private static Random rand = new Random();
+
+        [HarmonyPrefix, HarmonyPatch(typeof(ShopItemInfo), "Price", MethodType.Getter)]
+        static bool Price(ShopItemInfo __instance) {
+            if (Main.ConfigSomePrices.Value) {
+                if (__instance.Price == 0) {
+                    __instance.Price = (rand.Next(10) + 1) * 1000;
+                }
             }
 
             return true;

@@ -12,6 +12,7 @@ namespace TetoteCoreFixes {
         public static ConfigEntry<bool> ConfigPreventAutoScreenRotate;
         public static ConfigEntry<bool> ConfigCameraDummy;
         public static ConfigEntry<bool> ConfigEndlessDates;
+        public static ConfigEntry<bool> ConfigSomePrices;
 
         public static ManualLogSource Log;
 
@@ -23,6 +24,7 @@ namespace TetoteCoreFixes {
             ConfigPreventAutoScreenRotate = Config.Bind("General", "Prevent Screen Rotation", true, "Disables automatic screen rotation");
             ConfigCameraDummy = Config.Bind("General", "Camera Emulation", true, "Disable the camera requirement");
             ConfigEndlessDates = Config.Bind("General", "Disable End Dates", true, "Disable end dates of various things such as songs or events");
+            ConfigSomePrices = Config.Bind("General", "Add prices to the shop", true, "Adds some random prices to the shop items. Better than having them all being zero I guess?");
             
             Harmony.CreateAndPatchAll(typeof(Patches), "eu.haruka.gmg.cf.teto");
         }
