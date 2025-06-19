@@ -1,8 +1,10 @@
 using System;
+using System.Collections;
 using System.IO;
 using HarmonyLib;
 using Lod;
 using Lod.ImageRecognition;
+using Lod.TestMode;
 using Lod.TypeX4;
 using ScreenRotate;
 using UnityEngine;
@@ -266,6 +268,20 @@ namespace TetoteCoreFixes {
                     break;
             }
         }
-        
+
+        [HarmonyPostfix, HarmonyPatch(typeof(TestModeMainMenu), "TestModeEnd")]
+        static void TestModeEnd() {
+            GameInstance.Instance.LanguageManager.SelectedLanguage = Main.ConfigDefaultLanguage.Value;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(GameInstance), "SetupCoroutine")]
+        static IEnumerator SetupCoroutine(IEnumerator result) {
+            
+            // Run original enumerator code
+            while (result.MoveNext())
+                yield return result.Current;
+            
+            GameInstance.Instance.LanguageManager.SelectedLanguage = Main.ConfigDefaultLanguage.Value;
+        }
     }
 }
