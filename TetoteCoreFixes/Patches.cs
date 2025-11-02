@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.IO;
+using System.Linq;
 using HarmonyLib;
 using Lod;
 using Lod.ImageRecognition;
@@ -325,6 +326,18 @@ namespace TetoteCoreFixes {
         [HarmonyPrefix, HarmonyPatch(typeof(ErrorDisplayObject), "Start")]
         static bool Start() {
             GameInstance.Instance.LanguageManager.SelectedLanguage = Main.ConfigErrorLanguage.Value;
+            return true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(LoginBonusProgressUseCase), "GetRecievableLoginBonusInfo")]
+        static bool GetRecievableLoginBonusInfo(DateTimeOffset currentTime, ref LoginBonusScheduleInfo __result) {
+            if (Main.ConfigEnableLoginBonus.Value != -1) {
+                LoginBonusMaster instance = LoginBonusMaster.GetInstance();
+                __result = instance.LoginBonusScheduleInfos.Values.ToArray()[Main.ConfigEnableLoginBonus.Value];
+                __result.endDate = "2099/09/03 00:00";
+                __result.EndDate = __result.ConvertStringToDateTimeOffset(__result.endDate);
+                return false;
+            }
             return true;
         }
     }

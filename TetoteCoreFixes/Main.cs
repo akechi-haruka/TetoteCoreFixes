@@ -7,7 +7,7 @@ using Lod.TypeX4;
 
 namespace TetoteCoreFixes {
     
-    [BepInPlugin("eu.haruka.gmg.cf.teto", "Tetote Core Fixes", "1.3")]
+    [BepInPlugin("eu.haruka.gmg.cf.teto", "Tetote Core Fixes", "1.4")]
     public class Main : BaseUnityPlugin {
 
         public enum TouchSetting {
@@ -27,6 +27,7 @@ namespace TetoteCoreFixes {
         public static ConfigEntry<bool> ConfigPreventAutoScreenRotate;
         public static ConfigEntry<CameraSetting> ConfigCamera;
         public static ConfigEntry<bool> ConfigEndlessDates;
+        public static ConfigEntry<int> ConfigEnableLoginBonus;
         public static ConfigEntry<bool> ConfigSomePrices;
         public static ConfigEntry<bool> ConfigInformationBugfix;
         public static ConfigEntry<TouchSetting> ConfigTouchCheck;
@@ -51,6 +52,7 @@ namespace TetoteCoreFixes {
 
             ConfigPreventAutoScreenRotate = Config.Bind("General", "Prevent Screen Rotation", true, "Disables automatic screen rotation");
             ConfigEndlessDates = Config.Bind("General", "Disable End Dates", true, "Disable end dates of various things such as songs or the shop");
+            ConfigEnableLoginBonus = Config.Bind("General", "Enable Login Bonus", -1, new ConfigDescription("Enables the login bonus schedule with the given ID. -1 to disable.", new AcceptableValueRange<int>(-1, 10)));
             ConfigSomePrices = Config.Bind("General", "Add prices to the shop", true, "Adds some random prices to the shop items. Better than having them all being zero I guess?");
             ConfigInformationBugfix = Config.Bind("General", "Bugfix for inaccessible information menu", true, "Fixes game deleting information data for some stupid reason");
             ConfigSafeFileDirectory = Config.Bind("General", "NVRAM Path", "nvram", "Sets the path to where backup data is written to. If this is empty, the original (encrypted) storage will be used.");
