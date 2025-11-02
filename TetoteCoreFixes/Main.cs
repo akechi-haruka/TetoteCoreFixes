@@ -7,7 +7,7 @@ using Lod.TypeX4;
 
 namespace TetoteCoreFixes {
     
-    [BepInPlugin("eu.haruka.gmg.cf.teto", "Tetote Core Fixes", "1.2")]
+    [BepInPlugin("eu.haruka.gmg.cf.teto", "Tetote Core Fixes", "1.3")]
     public class Main : BaseUnityPlugin {
 
         public enum TouchSetting {
@@ -37,6 +37,11 @@ namespace TetoteCoreFixes {
         public static ConfigEntry<KeyboardShortcut> ConfigEnterKey;
         public static ConfigEntry<KeyboardShortcut> ConfigSelectKey;
         public static ConfigEntry<LanguageManager.Language> ConfigDefaultLanguage;
+        public static ConfigEntry<bool> ConfigDisablePartnerRandomization;
+        public static ConfigEntry<int> ConfigPartnerMaxHeight;
+        public static ConfigEntry<int> ConfigScreenPositionAdjust;
+        public static ConfigEntry<bool> ConfigNoteTimeScaleAdjust;
+        public static ConfigEntry<LanguageManager.Language> ConfigErrorLanguage;
 
         public static ManualLogSource Log;
 
@@ -49,7 +54,14 @@ namespace TetoteCoreFixes {
             ConfigSomePrices = Config.Bind("General", "Add prices to the shop", true, "Adds some random prices to the shop items. Better than having them all being zero I guess?");
             ConfigInformationBugfix = Config.Bind("General", "Bugfix for inaccessible information menu", true, "Fixes game deleting information data for some stupid reason");
             ConfigSafeFileDirectory = Config.Bind("General", "NVRAM Path", "nvram", "Sets the path to where backup data is written to. If this is empty, the original (encrypted) storage will be used.");
-            ConfigDefaultLanguage = Config.Bind("General", "Default Language", LanguageManager.Language.English, "Sets the default game language to be displayed after boot and test menu.");
+            
+            ConfigDefaultLanguage = Config.Bind("Mods", "Default Language", LanguageManager.Language.English, "Sets the default game language to be displayed after boot and test menu.");
+            ConfigErrorLanguage = Config.Bind("Mods", "Error Language", LanguageManager.Language.English, "Sets the language of the error screen to the specified value.");
+            ConfigDisablePartnerRandomization = Config.Bind("Mods", "Disable Partner Randomization", false, "Disables the partner randomization on first play.");
+            
+            ConfigPartnerMaxHeight = Config.Bind("Partner Height Mods", "Override Maximum Height (!)", 175, new ConfigDescription("Increase the maximum height from 175. Visual only, does not change notes.\n\n(!) CAUTION: In tests, going above 190 will make notes appear outside the screen!\nIf this is changed, make sure \"Adjust Note Circle Scale\" is also enabled!", new AcceptableValueRange<int>(175, 200)));
+            ConfigNoteTimeScaleAdjust = Config.Bind("Partner Height Mods", "Adjust Note Circle Scale", false, new ConfigDescription("If the maximum height is set higher than 175, this will also cause note circles to no longer adjust for excessive height."));
+            ConfigScreenPositionAdjust = Config.Bind("Partner Height Mods", "Bottom Screen Position Adjustment (!)", 0, new ConfigDescription("If the bottom edge of the touchscreen is not at ~61cm, modify the screen position with this setting, so the ingame height selector matches the real height.\n\n(!) Going above +15 will make notes appear outside the screen!", new AcceptableValueRange<int>(-50, 50)));
             
             ConfigTouchCheck = Config.Bind("Input", "Touchscreen Check Mode", TouchSetting.AnyTouchscreen, "Changes how the game checks for the touchscreen\n\n* Original: Checks for the specific touchscreen that comes with the cabinet.\n* AnyTouchscreen: Checks if any touchscreen is connected\n* Disabled: The check will always be OK");
             ConfigSkipAeroBootCheck = Config.Bind("Input", "Skip Aero Boot Check", true, "Disables launching aeroBootCheckWnd.exe");
