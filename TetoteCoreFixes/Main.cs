@@ -43,6 +43,7 @@ namespace TetoteCoreFixes {
         public static ConfigEntry<int> ConfigScreenPositionAdjust;
         public static ConfigEntry<bool> ConfigNoteTimeScaleAdjust;
         public static ConfigEntry<LanguageManager.Language> ConfigErrorLanguage;
+        public static ConfigEntry<bool> ConfigPreventCardReadOnAttract;
 
         public static ManualLogSource Log;
 
@@ -56,6 +57,7 @@ namespace TetoteCoreFixes {
             ConfigSomePrices = Config.Bind("General", "Add prices to the shop", true, "Adds some random prices to the shop items. Better than having them all being zero I guess?");
             ConfigInformationBugfix = Config.Bind("General", "Bugfix for inaccessible information menu", true, "Fixes game deleting information data for some stupid reason");
             ConfigSafeFileDirectory = Config.Bind("General", "NVRAM Path", "nvram", "Sets the path to where backup data is written to. If this is empty, the original (encrypted) storage will be used.");
+            ConfigPreventCardReadOnAttract = Config.Bind("General", "Disable Attact Mode Card Reading", false, "Disables the card reader on attract (but not on login)");
             
             ConfigDefaultLanguage = Config.Bind("Mods", "Default Language", LanguageManager.Language.English, "Sets the default game language to be displayed after boot and test menu.");
             ConfigErrorLanguage = Config.Bind("Mods", "Error Language", LanguageManager.Language.English, "Sets the language of the error screen to the specified value.");

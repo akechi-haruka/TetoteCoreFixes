@@ -8,7 +8,6 @@ using Lod.ImageRecognition;
 using Lod.TestMode;
 using Lod.TypeX4;
 using UnityEngine;
-using Debug = Lod.Debug;
 using Random = System.Random;
 
 // ReSharper disable InconsistentNaming
@@ -314,7 +313,7 @@ namespace TetoteCoreFixes {
             if (__instance.isUpperPlayerHeight) {
                 int num = GameInstance.Instance.IngameContext.PlayerHeight - Math.Max(176, Main.ConfigPartnerMaxHeight.Value + 1);
                 float num3 = Mathf.Pow(24f, __instance.Config.Exponent_Lower) / (__instance.Config.PowMax_Lower - 1f);
-                __instance.HeightRate = Mathf.Pow((float)num, __instance.Config.Exponent_Lower) / num3 + 1f;
+                __instance.HeightRate = Mathf.Pow(num, __instance.Config.Exponent_Lower) / num3 + 1f;
             }
         }
 
@@ -338,7 +337,61 @@ namespace TetoteCoreFixes {
                 __result.EndDate = __result.ConvertStringToDateTimeOffset(__result.endDate);
                 return false;
             }
+
             return true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(AttractController), "Update")]
+        static bool Update(AttractController __instance) {
+            if (__instance.SceneEnding) {
+                return false;
+            }
+
+            if (GameInstance.Instance.IsOnline != __instance.OldIsOnline) {
+                __instance.OnIsOnlineUpdated(GameInstance.Instance.IsOnline);
+                if (__instance.SubSceneNameBackup == string.Empty || __instance.SubSceneNameBackup == SceneDefinition.PlayDemo) {
+                    __instance.CanPlayDemo = true;
+                } else {
+                    __instance.CanPlayDemo = false;
+                }
+            }
+
+            if (!__instance.SceneEnding && !__instance.LoginRequested) {
+                if (GameInstance.Instance.IsOnline && !Main.ConfigPreventCardReadOnAttract.Value) {
+                    if (!GameInstance.Instance.ArcadeIOManager.icReader.IsReading) {
+                        if (!__instance.NesicaEventAdded) {
+                            GameInstance.Instance.ArcadeIOManager.icReader.OnReadEnded += __instance.OnNESiCAReadEnded;
+                            __instance.NesicaEventAdded = true;
+                        }
+
+                        GameInstance.Instance.ArcadeIOManager.icReader.StartReading();
+                    }
+                } else if (GameInstance.Instance.ArcadeIOManager.icReader.IsReading) {
+                    GameInstance.Instance.ArcadeIOManager.icReader.Clear();
+                    __instance.NesicaEventAdded = false;
+                }
+
+                __instance.CautionTextOnline.SetActive(GameInstance.Instance.IsOnline);
+                __instance.CautionTextOffline.SetActive(!GameInstance.Instance.IsOnline);
+            }
+
+            __instance.OldIsOnline = GameInstance.Instance.IsOnline;
+            __instance.ClosedTextObject.SetActive(UIUtility.IsPlayLimitNow() && !UIUtility.IsPlayClosed());
+            if (!__instance.HandlingStartNextSubScene && !__instance.SubSceneExists) {
+                if (__instance.LoginRequested) {
+                    __instance.LoginRequested = !__instance.RequestGoToLoginScene();
+                    return false;
+                }
+
+                if (__instance.TitleSceneRequested) {
+                    __instance.TitleSceneRequested = !__instance.RequestTitleSubScene();
+                    return false;
+                }
+
+                __instance.StartNextSubScene();
+            }
+
+            return false;
         }
     }
 }
