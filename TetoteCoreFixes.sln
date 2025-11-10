@@ -2,6 +2,12 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TetoteCoreFixes", "TetoteCoreFixes\TetoteCoreFixes.csproj", "{703CE622-1A3E-4F8F-A195-1CB1D88E3237}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TetoteCustomMasterData", "TetoteCustomMasterData\TetoteCustomMasterData.csproj", "{34AC3932-F98D-40B8-ADCD-C28F1C48DD0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tetote4K", "Tetote4K\Tetote4K.csproj", "{343BA02D-5466-4DE2-B047-21AD25D6338F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Retote", "Retote\Retote.csproj", "{9089C668-334A-4F5F-8B1D-3CBE61B53A4E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +18,17 @@ Global
 		{703CE622-1A3E-4F8F-A195-1CB1D88E3237}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{703CE622-1A3E-4F8F-A195-1CB1D88E3237}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{703CE622-1A3E-4F8F-A195-1CB1D88E3237}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34AC3932-F98D-40B8-ADCD-C28F1C48DD0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34AC3932-F98D-40B8-ADCD-C28F1C48DD0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34AC3932-F98D-40B8-ADCD-C28F1C48DD0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34AC3932-F98D-40B8-ADCD-C28F1C48DD0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{343BA02D-5466-4DE2-B047-21AD25D6338F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{343BA02D-5466-4DE2-B047-21AD25D6338F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{343BA02D-5466-4DE2-B047-21AD25D6338F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{343BA02D-5466-4DE2-B047-21AD25D6338F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9089C668-334A-4F5F-8B1D-3CBE61B53A4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9089C668-334A-4F5F-8B1D-3CBE61B53A4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9089C668-334A-4F5F-8B1D-3CBE61B53A4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9089C668-334A-4F5F-8B1D-3CBE61B53A4E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
