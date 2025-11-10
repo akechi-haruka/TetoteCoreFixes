@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using HarmonyLib;
@@ -390,6 +391,89 @@ namespace TetoteCoreFixes {
 
                 __instance.StartNextSubScene();
             }
+
+            return false;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(TitleControllerBase), "DisplayTime", MethodType.Getter)]
+        static void DisplayTime(ref float __result) {
+            __result = Main.ConfigTitleScreenTimer.Value;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(PlayDemoContext), "GeneratePlaylist")]
+        static void GeneratePlaylist(PlayDemoContext __instance) {
+            if (Main.ConfigDemonstrationNonNew.Value) {
+                __instance.PlaylistStageIds.AddRange(StageDefinitionMaster.GetInstance().GetStageInfoValues(false, false).Select(s => s.id));
+                __instance.PlaylistIndex = new Random().Next(0, __instance.PlaylistStageIds.Count);
+            }
+        }
+
+        private static readonly NumberFormatInfo JAPANESE = CultureInfo.GetCultureInfoByIetfLanguageTag("ja").NumberFormat;
+
+        [HarmonyPrefix, HarmonyPatch(typeof(NumberFormatInfo), "CurrentInfo", MethodType.Getter)]
+        static bool CurrentInfo(ref NumberFormatInfo __result) {
+            if (!Main.ConfigNumberFormatFix.Value) {
+                return true;
+            }
+
+            __result = JAPANESE;
+
+            return false;
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(PreparationController), "PrepareCharacter")]
+        private static IEnumerator PrepareCharacter(IEnumerator __result) {
+            if (!Main.ConfigSkipPreloading.Value) {
+                // Run original enumerator code
+                while (__result.MoveNext())
+                    yield return __result.Current;
+            }
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(UIFooterWidget), "Start")]
+        static void Start(UIFooterWidget __instance) {
+            __instance.version.text = "Ver " + Application.version + " (CF " + Main.VERSION + ")";
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(AttractController), "SelectMainCharacter")]
+        static IEnumerator SelectMainCharacter(IEnumerator result, AttractController __instance) {
+            if (!string.IsNullOrEmpty(__instance.MainCharacterSoundBankId)) {
+                GameInstance.Instance.SoundManager.UnloadBankById(__instance.MainCharacterSoundBankId);
+            }
+
+            CharacterInfo characterInfo = GameInstance.Instance.ActiveCharacterInfos[__instance.MainCharacterTableIndex];
+            if (GameInstance.Instance.CollaborationManager.ActiveCollaborationInfo == null) {
+                GameInstance.Instance.CollaborationManager.SelectActiveCollaboration();
+            }
+
+            if (!Main.ConfigForceRandomAttractPartners.Value && GameInstance.Instance.CollaborationManager.ActiveCollaborationInfo != null) {
+                foreach (CharacterInfo characterInfo2 in CharacterMaster.GetInstance().SortedAllCharacterInfos) {
+                    if (characterInfo2.id == GameInstance.Instance.CollaborationManager.ActiveCollaborationInfo.CharacterId) {
+                        characterInfo = characterInfo2;
+                    }
+                }
+            }
+
+            __instance.MainCharacterId = characterInfo.id;
+            int num = AttractController.FirstVersionCharactorNum + (GameInstance.Instance.ActiveCharacterInfos.Count - AttractController.FirstVersionCharactorNum) * 5;
+            __instance.MainCharacterTableIndex = global::UnityEngine.Random.Range(0, num);
+            if (__instance.MainCharacterTableIndex >= AttractController.FirstVersionCharactorNum) {
+                __instance.MainCharacterTableIndex = global::UnityEngine.Random.Range(AttractController.FirstVersionCharactorNum, GameInstance.Instance.ActiveCharacterInfos.Count);
+            }
+
+            __instance.MainCharacterSoundBankId = characterInfo.voiceCueSheet;
+            GameInstance.Instance.SoundManager.LoadBankById(__instance.MainCharacterSoundBankId);
+            yield return new WaitWhile(() => GameInstance.Instance.SoundManager.IsBankLoading());
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(UIEntryController), "OnUseDataConfirmClosed")]
+        static bool OnUseDataConfirmClosed(UIEntryController __instance) {
+            if (!Main.ConfigAlwaysShowMultiSelection.Value) {
+                return true;
+            }
+
+            __instance.OnClosed();
+            GameInstance.Instance.MenuManager.OpenGPPurchase(UIGPPurchaseWidget.Type.MultiPlay, __instance.OnPurchaced, __instance.GoToTitle, true);
 
             return false;
         }
