@@ -118,7 +118,7 @@ public class GameplayRestorationPatches {
         __instance.UpdateCircleBase(currentTime.Beat);
         __instance.UpdateCircleGauge(currentTime.Beat);
 
-        
+
         // TODO: Judgements always succeed
         // m_bSuccess is normally set by OnRecgnitionFinished, which has no calls...
         // Lod.ImageRecognition.Recognizer has also been wiped.......
@@ -152,6 +152,7 @@ public class GameplayRestorationPatches {
         float time = __instance.m_MarkerData.time;
         for (int i = 0; i < __instance.m_voiceOffsetTime.Length; i++) {
             __instance.m_voiceOffsetTime[i] = time - (3 - i - 1) + __instance.m_Player.StagePlayer.currentMusicTime.BeatBySecond(systemVoiceOffsetTime[i]);
+            Plugin.Logger.LogDebug("Voice time " + i + ": " + __instance.m_voiceOffsetTime[i]);
         }
 
         return false;
@@ -159,8 +160,10 @@ public class GameplayRestorationPatches {
 
     [HarmonyPrefix, HarmonyPatch(typeof(MarkerUpdater_Pose), "CalculatePlayVoiceTime")]
     static bool CalculatePlayReactionTime(MarkerUpdater_Pose __instance) {
-        __instance.m_reactionOffsetTime[0] = __instance.PlayerStatus.Config.HighTouch_ReactionTime_BeforePose + 2;
-        __instance.m_reactionOffsetTime[1] = __instance.PlayerStatus.Config.HighTouch_ReactionTime_Pose - 2;
+        __instance.m_reactionOffsetTime[0] = __instance.PlayerStatus.Config.HighTouch_ReactionTime_BeforePose;
+        __instance.m_reactionOffsetTime[1] = __instance.PlayerStatus.Config.HighTouch_ReactionTime_Pose - 1;
+        Plugin.Logger.LogDebug("Reaction time before pose: " + __instance.m_reactionOffsetTime[0]);
+        Plugin.Logger.LogDebug("Reaction time at pose: " + __instance.m_reactionOffsetTime[1]);
         return false;
     }
 
@@ -210,5 +213,17 @@ public class GameplayRestorationPatches {
 
         __instance.m_GradeAsset = __instance.Updater.Player.ReserveAsset(EffectDispenser.EffectType.HighTouch);
         __instance.m_GradeAsset.transform.localPosition = Vector3.zero;
+    }
+
+    [HarmonyPostfix, HarmonyPatch(typeof(MarkerChartData.MarkerData), "AppearAt")]
+    [SuppressMessage("Method Declaration", "Harmony003:Harmony non-ref patch parameters modified")]
+    private static void AppearAt(MusicTime currentTime, MarkerChartData.MarkerData __instance, ref float __result) {
+        if (__instance.type != MarkerChartData.MarkerData.Type.Pose) {
+            return;
+        }
+
+        float beforePoseTime = GameInstance.Instance.MasterManager.ConfigMaster.GetHighTouchReactionTime_BeforePose();
+        float adjustedPoseTime = beforePoseTime * currentTime.GetNumeratorByBeat(__instance.time - beforePoseTime);
+        __result = __instance.time - adjustedPoseTime;
     }
 }
