@@ -6,6 +6,7 @@ using HarmonyLib;
 using Lod;
 using Lod.ChartEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Utf8Json.Internal.DoubleConversion;
 
 // ReSharper disable InconsistentNaming
@@ -20,19 +21,66 @@ public class Plugin : BaseUnityPlugin {
 
     static ConfigEntry<bool> ConfigEnable;
     static ConfigEntry<bool> ConfigIngameLowResDisable;
+    static ConfigEntry<string> ConfigIngameShader;
 
     private static float ScreenScaleH = 1;
     private static float ScreenScaleW = 1;
 
+    private static bool HasLoaded = false;
 
     private void Awake() {
         Logger = base.Logger;
 
         ConfigEnable = Config.Bind("General", "Enable", true, "Enables resolution adjustments (so stuff registers correctly on resolutions that are not 1080p)");
-        //ConfigIngameLowResDisable = Config.Bind("General", "Adjust Gameplay Resolution", true, "By default the game scales down rendering during gameplay. Enable this to apply the real resolution to gameplay.");
+        ConfigIngameLowResDisable = Config.Bind("General", "Adjust Gameplay Resolution", true, "By default the game scales down rendering during gameplay. Enable this to apply the real resolution to gameplay. Requires to change the shader specified in the \"Shader\" setting.");
+        ConfigIngameShader = Config.Bind("General", "Shader", "LOD_BG/InGameRenderShader", "Name of the shader to use ingame if \"Adjust Gameplay Resolution\" is set.");
+        
+        SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
 
         Harmony.CreateAndPatchAll(typeof(Patches));
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
+    }
+
+    private static void SceneManagerOnSceneLoaded(Scene arg0, LoadSceneMode arg1) {
+        Logger.LogDebug("OnLoaded: " + arg0.name);
+        if (arg0.name == "Attract") {
+            HasLoaded = true;
+        }
+        
+        if (!ConfigEnable.Value || !ConfigIngameLowResDisable.Value || arg0.name != "stg001_test" || !HasLoaded) {
+            return;
+        }
+
+        GameObject go = GameObject.Find("InGameRenderCamera/BG");
+        if (go == null) {
+            Logger.LogError("Failed to find InGameRenderCamera/BG");
+            return;
+        }
+
+        MeshRenderer mr = go.GetComponent<MeshRenderer>();
+        if (mr == null) {
+            Logger.LogError("Failed to find MeshRenderer");
+            return;
+        }
+
+        if (mr.sharedMaterial == null) {
+            Logger.LogError("Shared material is null!");
+            return;
+        }
+
+        if (ConfigIngameShader.Value != "") {
+            Shader target = Shader.Find(ConfigIngameShader.Value);
+            if (target == null) {
+                Logger.LogError("Target Shader not found! " + ConfigIngameShader.Value);
+                return;
+            }
+
+            mr.sharedMaterial.shader = target;
+        } else {
+            mr.sharedMaterial.shader = null;
+        }
+
+        Logger.LogInfo("Successfully changed low resolution shader to " + ConfigIngameShader.Value);
     }
 
     public class Patches {
@@ -71,7 +119,7 @@ public class Plugin : BaseUnityPlugin {
         }
 
         // this actually seems unused
-        /*[HarmonyPostfix, HarmonyPatch(typeof(LowResolutionCamera), "GetResolutionSize")]
+        [HarmonyPostfix, HarmonyPatch(typeof(LowResolutionCamera), "GetResolutionSize")]
         static void GetResolutionSize(LowResolutionCamera.Resolution resolution, ref Vector2Int __result) {
             if (!ConfigEnable.Value || !ConfigIngameLowResDisable.Value) {
                 return;
@@ -79,7 +127,7 @@ public class Plugin : BaseUnityPlugin {
 
             __result = new Vector2Int(Screen.width, Screen.height);
             Logger.LogInfo("Adjusting camera size to " + __result);
-        }*/
+        }
 
         // Can anyone tell me who is more proficient in Unity why THIS screen in particular does weird things? Apparently the hand X position is in the negatives??
         [HarmonyPostfix, HarmonyPatch(typeof(LoginBonusController), "Update")]
@@ -90,13 +138,13 @@ public class Plugin : BaseUnityPlugin {
             
             if (__instance._TouchLeftHandSide != null) {
                 Vector3 position = __instance._TouchLeftHandSide.transform.localPosition;
-                position.x = (float)(-165 * Math.Sqrt(ScreenScaleW+ScreenScaleH));
+                position.x = -165 * (ScreenScaleW+ScreenScaleH);
                 __instance._TouchLeftHandSide.transform.localPosition = position;
             }
 
             if (__instance._TouchRightHandSide != null) {
                 Vector3 position2 = __instance._TouchRightHandSide.transform.localPosition;
-                position2.x = (float)(165 * Math.Sqrt(ScreenScaleW+ScreenScaleH));
+                position2.x = 165 * (ScreenScaleW+ScreenScaleH);
                 __instance._TouchRightHandSide.transform.localPosition = position2;
             }
 
