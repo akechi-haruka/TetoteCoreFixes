@@ -5,6 +5,7 @@ using HarmonyLib;
 using Lod;
 using UnityEngine;
 using Debug = Lod.Debug;
+using Logger = Lod.Logger;
 
 namespace Retote;
 
@@ -96,6 +97,10 @@ public class GameplayRestorationPatches {
     [SuppressMessage("Method Declaration", "Harmony003:Harmony non-ref patch parameters modified")]
     private static bool UpdateInactive(MusicTime currentTime, MarkerUpdater_Pose __instance) {
         if (__instance.IsGradingStart(currentTime)) { // .base copy
+            if (__instance.m_MarkerData.length <= 1.0F) {
+                __instance.m_MarkerData.length = 4.0F;
+                Plugin.Logger.LogWarning("Pose marker length was incorrect!");
+            }
             __instance.SetState(MarkerUpdater.State.Active, currentTime);
         }
 
@@ -122,7 +127,10 @@ public class GameplayRestorationPatches {
         // TODO: Judgements always succeed
         // m_bSuccess is normally set by OnRecgnitionFinished, which has no calls...
         // Lod.ImageRecognition.Recognizer has also been wiped.......
-        __instance.m_bSuccess = true;
+        if (currentTime.Beat >= __instance.m_MarkerData.time + (Plugin.ConfigFakeJudgementDelay.Value / 10F)) {
+            Plugin.Logger.LogDebug("Hit fake judgement timing");
+            __instance.m_bSuccess = true;
+        }
 
         if (currentTime.Beat >= __instance.m_MarkerData.time && currentTime.Beat <= __instance.m_MarkerData.End && (__instance.m_bSuccess || !__instance.PoseRecognizable)) {
             Plugin.Logger.LogDebug("Pose is JUDGED (" + __instance.m_bSuccess + ")");
