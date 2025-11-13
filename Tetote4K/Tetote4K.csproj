@@ -14,8 +14,8 @@
         </RestoreAdditionalProjectSources>
         <RootNamespace>Tetote4K</RootNamespace>
         <Company>eu.haruka.gmg.cf.teto.4k</Company>
-        <AssemblyVersion>1.0</AssemblyVersion>
-        <FileVersion>1.0</FileVersion>
+        <AssemblyVersion>1.1</AssemblyVersion>
+        <FileVersion>1.1</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>

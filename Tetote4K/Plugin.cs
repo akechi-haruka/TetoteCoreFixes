@@ -13,7 +13,7 @@ using Utf8Json.Internal.DoubleConversion;
 
 namespace Tetote4K;
 
-[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, "1.1")]
 public class Plugin : BaseUnityPlugin {
     private const int DEFAULT_HEIGHT = 1920;
     private const int DEFAULT_WIDTH = 1080;
@@ -22,6 +22,7 @@ public class Plugin : BaseUnityPlugin {
     static ConfigEntry<bool> ConfigEnable;
     static ConfigEntry<bool> ConfigIngameLowResDisable;
     static ConfigEntry<string> ConfigIngameShader;
+    static ConfigEntry<int> ConfigLoginTouchAdjustX;
 
     private static float ScreenScaleH = 1;
     private static float ScreenScaleW = 1;
@@ -34,6 +35,7 @@ public class Plugin : BaseUnityPlugin {
         ConfigEnable = Config.Bind("General", "Enable", true, "Enables resolution adjustments (so stuff registers correctly on resolutions that are not 1080p)");
         ConfigIngameLowResDisable = Config.Bind("General", "Adjust Gameplay Resolution", true, "By default the game scales down rendering during gameplay. Enable this to apply the real resolution to gameplay. Requires to change the shader specified in the \"Shader\" setting.");
         ConfigIngameShader = Config.Bind("General", "Shader", "LOD_BG/InGameRenderShader", "Name of the shader to use ingame if \"Adjust Gameplay Resolution\" is set.");
+        ConfigLoginTouchAdjustX = Config.Bind("General", "Login Touch X Axis Adjustment", 0, "Adjusts the position of the touch markers for the login touch. Since I suck at math, you gotta do this manually for now.");
         
         SceneManager.sceneLoaded += SceneManagerOnSceneLoaded;
 
@@ -129,7 +131,7 @@ public class Plugin : BaseUnityPlugin {
             Logger.LogInfo("Adjusting camera size to " + __result);
         }
 
-        // Can anyone tell me who is more proficient in Unity why THIS screen in particular does weird things? Apparently the hand X position is in the negatives??
+        // FIXME: Can anyone tell me who is more proficient in Unity why THIS screen in particular does weird things? Apparently the hand X position is in the negatives??
         [HarmonyPostfix, HarmonyPatch(typeof(LoginBonusController), "Update")]
         static void Update(LoginBonusController __instance) {
             if (!ConfigEnable.Value) {
@@ -138,13 +140,13 @@ public class Plugin : BaseUnityPlugin {
             
             if (__instance._TouchLeftHandSide != null) {
                 Vector3 position = __instance._TouchLeftHandSide.transform.localPosition;
-                position.x = -165 * (ScreenScaleW+ScreenScaleH);
+                position.x = -ConfigLoginTouchAdjustX.Value;
                 __instance._TouchLeftHandSide.transform.localPosition = position;
             }
 
             if (__instance._TouchRightHandSide != null) {
                 Vector3 position2 = __instance._TouchRightHandSide.transform.localPosition;
-                position2.x = 165 * (ScreenScaleW+ScreenScaleH);
+                position2.x = ConfigLoginTouchAdjustX.Value;
                 __instance._TouchRightHandSide.transform.localPosition = position2;
             }
 
