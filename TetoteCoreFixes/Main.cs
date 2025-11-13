@@ -11,7 +11,7 @@ namespace TetoteCoreFixes {
     [BepInPlugin("eu.haruka.gmg.cf.teto", "Tetote Core Fixes", VERSION)]
     public class Main : BaseUnityPlugin {
 
-        public const String VERSION = "1.5";
+        public const String VERSION = "1.6";
 
         public enum TouchSetting {
             Original,
@@ -53,6 +53,8 @@ namespace TetoteCoreFixes {
         public static ConfigEntry<bool> ConfigSkipPreloading;
         public static ConfigEntry<bool> ConfigForceRandomAttractPartners;
         public static ConfigEntry<bool> ConfigAlwaysShowMultiSelection;
+        public static ConfigEntry<bool> ConfigMirrorFree;
+        public static ConfigEntry<bool> ConfigSortByNewIsSortByScore;
 
         public static ManualLogSource Log;
 
@@ -79,6 +81,8 @@ namespace TetoteCoreFixes {
             ConfigSkipPreloading = Config.Bind("Mods", "Skip Preloading", false, "Skip preloading costumes. This will cause a severe delay when loading characters and costumes");
             ConfigPreventCardReadOnAttract = Config.Bind("Mods", "Disable Attract Mode Card Reading", false, "Disables the card reader on attract (but not on login)");
             ConfigAlwaysShowMultiSelection = Config.Bind("Mods", "Always show multiplay selector", false, "Always shows the multiplayer selection window, even if only 1 cab is currently detected");
+            ConfigMirrorFree = Config.Bind("Mods", "Make Mirror Mode Free", false, "Makes mirror mode no longer cost coins");
+            ConfigSortByNewIsSortByScore = Config.Bind("Mods", "Replace New Sort with Score Sort", true, "This replaces the \"New\" option in the Sort menu to sort by best score instead.");
             
             ConfigPartnerMaxHeight = Config.Bind("Partner Height Mods", "Override Maximum Height (!)", 175, new ConfigDescription("Increase the maximum height from 175. Visual only, does not change notes.\n\n(!) CAUTION: In tests, going above 190 will make notes appear outside the screen!\nIf this is changed, make sure \"Adjust Note Circle Scale\" is also enabled!", new AcceptableValueRange<int>(175, 200)));
             ConfigNoteTimeScaleAdjust = Config.Bind("Partner Height Mods", "Adjust Note Circle Scale", false, new ConfigDescription("If the maximum height is set higher than 175, this will also cause note circles to no longer adjust for excessive height."));

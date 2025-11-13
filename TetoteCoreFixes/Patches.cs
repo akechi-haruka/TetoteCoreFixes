@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -476,6 +477,56 @@ namespace TetoteCoreFixes {
             GameInstance.Instance.MenuManager.OpenGPPurchase(UIGPPurchaseWidget.Type.MultiPlay, __instance.OnPurchaced, __instance.GoToTitle, true);
 
             return false;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(ConfigMaster), "GetMirrorModeCost")]
+        static bool GetMirrorModeCost(ref int __result) {
+            if (Main.ConfigMirrorFree.Value) {
+                __result = 0;
+                return false;
+            }
+
+            return true;
+        }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(SongSelectController), "SortStageInfoList")]
+        static bool SortStageInfoList(SongSelectController __instance) {
+            if (!Main.ConfigSortByNewIsSortByScore.Value || !__instance.sortToggle[1].isOn) {
+                return false;
+            }
+            
+            __instance.filteredStageInfos = (from m in __instance.filteredStageInfos
+                orderby GetHighestChartScore(m), m.reading
+                select m).ToList();
+
+            if (__instance.orderToggle[1].isOn) {
+                __instance.filteredStageInfos.Reverse();
+            }
+
+            return false;
+        }
+
+        private static int GetHighestChartScore(StageInfo stageInfo) {
+            MusicRecordUseCase mr = GameInstance.Instance.Player.MusicRecordUseCase;
+            List<int> scores = new List<int>();
+            
+            if (mr.IsPlayByChartId(stageInfo.chartIdEasy)) {
+                scores.Add(mr.GetHighScore(stageInfo.chartIdEasy));                
+            }
+            if (mr.IsPlayByChartId(stageInfo.chartIdNormal)) {
+                scores.Add(mr.GetHighScore(stageInfo.chartIdNormal));                
+            }
+            if (mr.IsPlayByChartId(stageInfo.chartIdHard)) {
+                scores.Add(mr.GetHighScore(stageInfo.chartIdHard));                
+            }
+            if (mr.IsPlayByChartId(stageInfo.chartIdManiac)) {
+                scores.Add(mr.GetHighScore(stageInfo.chartIdManiac));                
+            }
+            if (mr.IsPlayByChartId(stageInfo.chartIdConnect)) {
+                scores.Add(mr.GetHighScore(stageInfo.chartIdConnect));                
+            }
+
+            return scores.Count > 0 ? scores.Max() : 0;
         }
     }
 }

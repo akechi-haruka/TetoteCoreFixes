@@ -18,6 +18,8 @@ New:
 * Allow maximum dancer height to go past 175 and recalculate note positions
 * Adjust game position for non-standard monitor stands
 * Attract Adjustments (Timer, ignore collaboration status, fix missing demo play)
+* Make Mirror mode free
+* Replace sort by new with sort by score
 * [Tetote4K] Increase game resolution (unfinished, in menus only, see issue #1)
 * [TetoteCustomMasterData] Modify and replace charts, unlock characters (Hatsune Miku)
 * [Retote] Restore pose note functionality (unfinished, judgement code was wiped from the game)
