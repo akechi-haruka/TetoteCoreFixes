@@ -135,10 +135,10 @@ public class GameplayRestorationPatches {
         if (currentTime.Beat >= __instance.m_MarkerData.time && currentTime.Beat <= __instance.m_MarkerData.End && (__instance.m_bSuccess || !__instance.PoseRecognizable)) {
             Plugin.Logger.LogDebug("Pose is JUDGED (" + __instance.m_bSuccess + ")");
             InGameController inGameController = __instance.m_Player.StagePlayer.InGameContoller;
-            if (inGameController != null && inGameController.IsEnableNotesInput) {
+            if (inGameController != null && inGameController.IsEnableNotesInput) { // autoplay
                 __instance.OnGraded(MarkerUpdater.Grade.Perfect, currentTime);
             } else {
-                __instance.OnGraded(MarkerUpdater.Grade.Miss, currentTime);
+                __instance.OnGraded(__instance.m_bSuccess ? MarkerUpdater.Grade.Perfect : MarkerUpdater.Grade.Miss, currentTime);
             }
 
             __instance.SetState(MarkerUpdater.State.Graded, currentTime);
