@@ -151,6 +151,20 @@ public class Plugin : BaseUnityPlugin {
             }
 
         }
+        
+        // fix note judgement numbers out of screen
+        [HarmonyPrefix, HarmonyPatch(typeof(ResultScoreView), "Initialize")]
+        static void Initialize(ResultContext context, ResultScoreView __instance) {
+            __instance.GreatCountText.resizeTextMinSize = __instance.PerfectCountText.resizeTextMinSize;
+            __instance.GreatCountText.resizeTextMaxSize = __instance.PerfectCountText.resizeTextMaxSize;
+            __instance.GreatCountText.rectTransform.sizeDelta = new Vector2(__instance.GreatCountText.rectTransform.sizeDelta.x, __instance.GreatCountText.rectTransform.sizeDelta.y + 1);
+            __instance.GoodCountText.resizeTextMinSize = __instance.PerfectCountText.resizeTextMinSize;
+            __instance.GoodCountText.resizeTextMaxSize = __instance.PerfectCountText.resizeTextMaxSize;
+            __instance.GoodCountText.rectTransform.sizeDelta = new Vector2(__instance.GoodCountText.rectTransform.sizeDelta.x, __instance.GoodCountText.rectTransform.sizeDelta.y + 1);
+            __instance.MissCountText.resizeTextMinSize = __instance.PerfectCountText.resizeTextMinSize;
+            __instance.MissCountText.resizeTextMaxSize = __instance.PerfectCountText.resizeTextMaxSize;
+            __instance.MissCountText.rectTransform.sizeDelta = new Vector2(__instance.MissCountText.rectTransform.sizeDelta.x, __instance.MissCountText.rectTransform.sizeDelta.y + 1);
+        }
 
         #region Patched system message functions
 
