@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -8,7 +7,7 @@ using HarmonyLib;
 
 namespace Retote;
 
-[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, "1.1")]
+[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, "1.2")]
 [BepInDependency("TetoteCustomMasterData")]
 public class Plugin : BaseUnityPlugin {
     public new static ManualLogSource Logger;

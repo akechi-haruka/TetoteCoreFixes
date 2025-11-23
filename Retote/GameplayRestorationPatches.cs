@@ -5,7 +5,6 @@ using HarmonyLib;
 using Lod;
 using UnityEngine;
 using Debug = Lod.Debug;
-using Logger = Lod.Logger;
 
 namespace Retote;
 
@@ -101,6 +100,7 @@ public class GameplayRestorationPatches {
                 __instance.m_MarkerData.length = 4.0F;
                 Plugin.Logger.LogWarning("Pose marker length was incorrect!");
             }
+
             __instance.SetState(MarkerUpdater.State.Active, currentTime);
         }
 
@@ -152,6 +152,20 @@ public class GameplayRestorationPatches {
         }
 
         return false;
+    }
+
+    [HarmonyPrefix, HarmonyPatch(typeof(MarkerUpdater), "OnGraded")] // original excludes poses from combo gain
+    static bool OnGraded(MarkerUpdater.Grade result, MusicTime currentTime, MarkerUpdater __instance) {
+        if (__instance.m_Player.StagePlayer.InGameContoller.currentState == InGameController.State.Playing) {
+            if (__instance.m_MarkerData.type == MarkerChartData.MarkerData.Type.Pose) {
+                __instance.UpdateScore(result);
+                int num = __instance.UpdateCombo(result);
+                __instance.m_Asset.MyComboValue = num;
+                __instance.UpdateGradeNum(result);
+            }
+        }
+
+        return true;
     }
 
     [HarmonyPrefix, HarmonyPatch(typeof(MarkerUpdater_Pose), "CalculatePlayVoiceTime")]
